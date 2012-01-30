@@ -201,6 +201,16 @@ def write_hyde(data, target_format):
 
     def get_item_path(item, dir=''):
         full_dir=get_full_dir(dir)
+        if make_year_month_folder:
+            dt=datetime.strptime(item['date'],date_fmt)
+            y = dt.strftime('%Y')
+            full_dir=os.path.normpath(full_dir+'/'+y)
+            if (not os.path.exists(full_dir)):
+                os.makedirs(full_dir)
+            m = dt.strftime('%m')
+            full_dir=os.path.normpath(full_dir+'/'+m)
+            if (not os.path.exists(full_dir)):
+                os.makedirs(full_dir)
         filename_parts=[full_dir,'/']
         filename_parts.append(item['uid'])
         filename_parts.append('.')
