@@ -11,9 +11,13 @@ target_format: markdown
 # I'm not sure if this ever differs depending on wordpress localization.
 # Wordpress is often so full of strange quirks so I wouldnt rule it out.
 date_format: '%Y-%m-%d %H:%M:%S'
+#date_format: '%a, %d %b %Y %H:%M:%S +0000'
 
 # Try to download and reloacate all images locally to the blog.
 download_images: False
+
+# Make Year Month folder
+make_year_month_folder: True
 
 # Item types we don't want to import.
 item_type_filter: {attachment, nav_menu_item}

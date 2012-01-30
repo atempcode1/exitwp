@@ -42,6 +42,7 @@ taxonomy_entry_filter = config['taxonomies']['entry_filter']
 taxonomy_name_mapping = config['taxonomies']['name_mapping']
 item_type_filter = set(config['item_type_filter'])
 date_fmt=config['date_format']
+make_year_month_folder = config['make_year_month_folder']
 
 def html2fmt(html, target_format):
     target_format='markdown'
@@ -135,7 +136,7 @@ def parse_wp_xml(file):
                 }
 
             export_items.append(export_item)
-
+        #print export_items
         return export_items
 
     return {
@@ -170,6 +171,7 @@ def write_hyde(data, target_format):
 
     def get_item_uid(item, date_prefix=False, namespace=''):
         result=None
+        print item
         if namespace not in item_uids:
             item_uids[namespace]={}
 
@@ -194,6 +196,7 @@ def write_hyde(data, target_format):
                 fn=''.join(uid)+'_'+str(n)
                 item_uids[namespace][i['wp_id']]=fn
             result=fn
+        print item_uids
         return result
 
     def get_item_path(item, dir=''):
@@ -249,12 +252,12 @@ def write_hyde(data, target_format):
         }
 
         if i['type'] == 'post':
-            i['uid']=get_item_uid(i)
+            i['uid']=get_item_uid(i, True)
             fn=get_item_path(i, dir='_posts')
             out=open_file(fn)
             #yaml_header['layout']='post'
         elif i['type'] == 'page':
-            i['uid']=get_item_uid(i)
+            i['uid']=get_item_uid(i, True)
             fn=get_item_path(i)
             out=open_file(fn)
             #yaml_header['layout']='page'
