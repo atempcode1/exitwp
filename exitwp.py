@@ -171,7 +171,7 @@ def write_hyde(data, target_format):
 
     def get_item_uid(item, date_prefix=False, namespace=''):
         result=None
-        print item
+        # print item
         if namespace not in item_uids:
             item_uids[namespace]={}
 
@@ -196,12 +196,12 @@ def write_hyde(data, target_format):
                 fn=''.join(uid)+'_'+str(n)
                 item_uids[namespace][i['wp_id']]=fn
             result=fn
-        print item_uids
+        # print item_uids
         return result
 
     def get_item_path(item, dir=''):
         full_dir=get_full_dir(dir)
-        if make_year_month_folder:
+        if make_year_month_folder and not dir=='':
             dt=datetime.strptime(item['date'],date_fmt)
             y = dt.strftime('%Y')
             full_dir=os.path.normpath(full_dir+'/'+y)
