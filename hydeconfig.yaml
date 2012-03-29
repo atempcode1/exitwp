@@ -1,0 +1,5 @@
+# The directory where old hyde content in
+old_hyde_dir: wordpress-xml
+
+build_dir: newhydebuild
+
