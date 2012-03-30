@@ -290,9 +290,13 @@ def write_hyde(data, target_format):
     print "\n"
 
 
-wp_exports=glob(wp_exports+'/*.xml')
-for wpe in wp_exports:
-    data=parse_wp_xml(wpe)
-    write_hyde(data, target_format)
+for root, dirs, files in os.walk(wp_exports+"/"):
+    print root
+    print dirs
+    print files
+
+        if (not os.path.exists(full_dir)):
+            os.makedirs(full_dir)
+
 
 print 'done'
