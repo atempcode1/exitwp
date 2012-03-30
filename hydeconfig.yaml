@@ -1,5 +1,5 @@
 # The directory where old hyde content in
-old_hyde_dir: l:/src/newblog/MyBlog/content
+old_hyde_dir: l:/src/newblog/MyBlog/content.old
 
 build_dir: ./newhydebuild
 

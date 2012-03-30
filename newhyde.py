@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 
 from xml.etree.ElementTree import ElementTree
 from subprocess import call, PIPE, Popen
@@ -24,108 +24,52 @@ config=yaml.load(file('hydeconfig.yaml','r'))
 wp_exports=config['old_hyde_dir']
 build_dir=config['build_dir']
 
-def html2fmt(html, target_format):
-    target_format='markdown'
-    html = html.replace("\n\n", '<br>')
-    # print html.encode("utf-8")
-    if target_format=='html':
-        return html
-    else:
-        # This is like very stupid but I was having troubles with unicode encodings and process.POpen
-        # f=codecs.open('pandoc.in', 'w', encoding='utf-8')
-        # f.write(html)
-        # f.close()
-        # call(["pandoc","--reference-links","-f","html","-o", "pandoc.out", "-t",target_format, "pandoc.in"])
-        # f=codecs.open('pandoc.out', 'r', encoding='utf-8')
-        # lines=[]
-        # for line in f: lines.append(line)
-        # f.close()
-        # os.remove('pandoc.in')
-        # os.remove('pandoc.out')
-        # return ''.join(lines)
-        return html2text(html, '')
+def upgrade(origfile, rootpath):
 
-def parse_wp_xml(file):
-    ns = {
-        '':'', #this is the default namespace
-        'excerpt':"{http://wordpress.org/export/1.1/excerpt/}",
-        'content':"{http://purl.org/rss/1.0/modules/content/}",
-        'wfw':"{http://wellformedweb.org/CommentAPI/}",
-        'dc':"{http://purl.org/dc/elements/1.1/}",
-        'wp':"{http://wordpress.org/export/1.1/}"
-    }
+    def open_file(file):
+        f=codecs.open(file, 'w', encoding='utf-8')
+        return f
 
-    tree=ElementTree()
+    if origfile.lower().endswith('.html') or origfile.lower().endswith('.html~'):
+        print "Reading..."
+        outfile = open_file(rootpath + "/" + origfile + ".kk")
+        inhyde = False
+        infile = codecs.open(rootpath + "/" + origfile, "r", "utf-8")
+        for linetext in infile:
+            # print linetext
+            if linetext.startswith("%}") and inhyde:
+                outfile.write("---\n")
+                inhyde = False
+                continue
+            if linetext.startswith("{% hyde"):
+                outfile.write("---\n")
+                inhyde = True
+                continue
+            if linetext.startswith("{% extends \"_post.html\"") or   linetext.startswith("{% block article ")         or linetext.startswith("{% endblock"):
+                continue  
+            outfile.write(linetext)
+        outfile.close() 
+        infile.close()   
+        shutil.move(rootpath + "/" + origfile + ".kk", rootpath + "/" + origfile)
 
-    print "reading: " + wpe
 
-    root=tree.parse(file)
-    c=root.find('channel')
+    # search for 
+    # {% hyde
+    # title: 新的Blog
+    # created: 2012-03-14 22:36:00
+    # %}
+    #replace with
+    # ---
+    # title: ".htaccess for carisenda.com"
+    # created: !!timestamp '2012-02-03 13:14:10'
+    # tags:
+    #   - htaccess
+    #   - fonts
+    # tldr: "The Apache .htaccess file used for carisenda.com"
+    # subline: "Correct mime-types for woff files, the .htaccess file used on carisenda.com"
+    # ---
 
-    def parse_header():
-        return {
-            "title": unicode(c.find('title').text),
-            "link": unicode(c.find('link').text),
-            "description" : unicode(c.find('description').text)
-        }
 
-    def parse_items():
-        export_items=[]
-        xml_items=c.findall('item')
-        for i in xml_items:
-            taxanomies=i.findall('category')
-            export_taxanomies={}
-            for tax in taxanomies:
-                t_domain=unicode(tax.attrib['domain'])
-                t_entry=unicode(tax.text)
-                if not (t_domain in taxonomy_filter) and not (t_domain in taxonomy_entry_filter and taxonomy_entry_filter[t_domain]==t_entry):
-                    if not t_domain in export_taxanomies:
-                            export_taxanomies[t_domain]=[]
-                    export_taxanomies[t_domain].append(t_entry)
-
-            def gi(q, unicode_wrap=True):
-                namespace=''
-                tag=''
-                if q.find(':') > 0: namespace, tag=q.split(':',1)
-                else: tag=q
-                result=i.find(ns[namespace]+tag).text
-                if unicode_wrap: result=unicode(result)
-                return result
-
-            body=gi('content:encoded')
-
-            img_srcs=[]
-            if body is not None:
-                try:
-                    soup = BeautifulSoup(body)
-                    img_tags=soup.findAll('img')
-                    for img in img_tags:
-                        img_srcs.append(img['src'])
-                except:
-                    print "could not parse html: " + body
-            #print img_srcs
-
-            export_item = {
-                'title' : gi('title'),
-                'author' : gi('dc:creator'),
-                'date' : gi('wp:post_date'),
-                'slug' : gi('wp:post_name'),
-                'status' : gi('wp:status'),
-                'type' : gi('wp:post_type'),
-                'wp_id' : gi('wp:post_id'),
-                'taxanomies' : export_taxanomies,
-                'body' : body,
-                'img_srcs': img_srcs
-                }
-
-            export_items.append(export_item)
-        #print export_items
-        return export_items
-
-    return {
-        'header': parse_header(),
-        'items': parse_items(),
-    }
 
 
 def write_hyde(data, target_format):
@@ -297,12 +241,8 @@ if (os.path.exists(build_dir)):
 distutils.dir_util.copy_tree(wp_exports, build_dir)
 
 for root, dirs, files in os.walk(build_dir):
-    print root
-    print dirs
     print files
-
-        # if (not os.path.exists(full_dir)):
-        #     os.makedirs(full_dir)
-
+    for eachfile in files:
+        upgrade(eachfile, root)
 
 print 'done'
