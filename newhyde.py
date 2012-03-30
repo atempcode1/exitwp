@@ -13,6 +13,8 @@ from BeautifulSoup import BeautifulSoup
 from urlparse import urlparse, urljoin
 from urllib import urlretrieve
 from html2text import html2text
+import shutil
+import distutils.dir_util
 
 
 ######################################################
@@ -290,13 +292,17 @@ def write_hyde(data, target_format):
     print "\n"
 
 
-for root, dirs, files in os.walk(wp_exports+"/"):
+if (os.path.exists(build_dir)):
+    shutil.rmtree(build_dir)
+distutils.dir_util.copy_tree(wp_exports, build_dir)
+
+for root, dirs, files in os.walk(build_dir):
     print root
     print dirs
     print files
 
-        if (not os.path.exists(full_dir)):
-            os.makedirs(full_dir)
+        # if (not os.path.exists(full_dir)):
+        #     os.makedirs(full_dir)
 
 
 print 'done'
