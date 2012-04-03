@@ -306,7 +306,7 @@ def write_hyde(data, target_format):
                 return yaml.safe_dump(data, default_flow_style=False).decode('utf-8')
 
             mapout.write(i['link'])
-            mapout.write(' , ')
+            mapout.write(', ')
             mapout.write(GetNewUrl(i))
             mapout.write('\n')
 
