@@ -1,5 +1,5 @@
 ######
-Exitwp (modified by Boris Smus http//:smus.com for Hyde)
+Exitwp (modified by Michael for Hyde 1.0 based on version by Boris)
 ######
 
 Exitwp is tool for making migration from one or more wordpress blogs to the `hyde blog engine <https://github.com/mojombo/hyde/>`_ as easy as possible.

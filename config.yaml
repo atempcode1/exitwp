@@ -30,3 +30,7 @@ taxonomies:
   # Rename taxonomies when writing jekyll output format.
   name_mapping: {category: categories, post_tag: tags}
 
+
+#for the old new url mapping
+oldurl: http://www.hezhigeng.com/blog/
+newurl: http://www.hezhigeng.com/nublog/

@@ -44,6 +44,7 @@ taxonomy_name_mapping = config['taxonomies']['name_mapping']
 item_type_filter = set(config['item_type_filter'])
 date_fmt=config['date_format']
 make_year_month_folder = config['make_year_month_folder']
+newurl = config['newurl']
 
 def html2fmt(html, target_format):
     target_format='markdown'
@@ -136,7 +137,8 @@ def parse_wp_xml(file):
                 'wp_id' : gi('wp:post_id'),
                 'taxanomies' : export_taxanomies,
                 'body' : body,
-                'img_srcs': img_srcs
+                'img_srcs': img_srcs,
+                'link': gi('link')
                 }
 
             export_items.append(export_item)
@@ -222,6 +224,15 @@ def write_hyde(data, target_format):
         filename_parts.append('html')
         return ''.join(filename_parts)
 
+    def GetNewUrl(item, root=newurl):
+        full_dir = root
+        dt=datetime.strptime(item['date'],date_fmt)
+        y = dt.strftime('%Y')
+        full_dir=full_dir+y
+        m = dt.strftime('%m')
+        full_dir=full_dir+'/'+m+'/'+item['uid']+'.html'
+        return full_dir
+
     def get_attachment_path(src, dir, dir_prefix='a'):
         try:
             files=attachments[dir]
@@ -253,6 +264,8 @@ def write_hyde(data, target_format):
 
     #data['items']=[]
 
+    mapout = open_file(os.path.normpath(build_dir +'/' +  "map.csv"))
+
     for i in data['items']:
         sys.stdout.write(".")
         sys.stdout.flush()
@@ -268,11 +281,13 @@ def write_hyde(data, target_format):
         if i['type'] == 'post':
             i['uid']=get_item_uid(i, True)
             fn=get_item_path(i, dir='_posts')
+            print fn    
             out=open_file(fn)
             #yaml_header['layout']='post'
         elif i['type'] == 'page':
             i['uid']=get_item_uid(i, True)
             fn=get_item_path(i)
+            print fn    
             out=open_file(fn)
             #yaml_header['layout']='page'
         elif i['type'] in item_type_filter:
@@ -290,6 +305,11 @@ def write_hyde(data, target_format):
             def toyaml(data):
                 return yaml.safe_dump(data, default_flow_style=False).decode('utf-8')
 
+            mapout.write(i['link'])
+            mapout.write(' , ')
+            mapout.write(GetNewUrl(i))
+            mapout.write('\n')
+
             tax_out={}
             for taxonomy in i['taxanomies']:
                 for tvalue in i['taxanomies'][taxonomy]:
@@ -306,10 +326,12 @@ def write_hyde(data, target_format):
             out.write('%}\n\n')
 
             out.write('{% block article %}\n')
-            out.write(html2fmt(i['body'], target_format))
+            out.write(i['body'])
+            # out.write(html2fmt(i['body'], target_format))
             out.write('{% endblock %}\n')
 
             out.close()
+    mapout.close()
     print "\n"
 
 
